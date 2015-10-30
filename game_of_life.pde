@@ -1,3 +1,5 @@
+import java.util.Calendar;
+
 // GOD CONSTANTS
 int CELL_SIZE = 10;
 /*int WINDOW_SIZE_X = 800;
@@ -93,6 +95,9 @@ void mousePressed() {
   } else {
     paintWithBrush();
   }
+}
+void keyReleased() {
+  if (key == 'f' || key == 'F') saveFrame("dvdisawesome" + timestamp() + "_##.png");
 }
 
 void keyPressed() {
@@ -330,3 +335,10 @@ int[][] lightWeightSpaceShip =
 {1,0,0,0,1}, 
 {1,1,1,1,0}
 };
+
+
+// timestamp
+String timestamp() {
+  Calendar now = Calendar.getInstance();
+  return String.format("%1$ty%1$tm%1$td_%1$tH%1$tM%1$tS", now);
+}
