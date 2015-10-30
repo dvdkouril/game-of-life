@@ -6,6 +6,8 @@ int WINDOW_SIZE_Y = 600;
 int CELLS_NUM_X = WINDOW_SIZE_X / CELL_SIZE;
 int CELLS_NUM_Y = WINDOW_SIZE_Y / CELL_SIZE;
 
+boolean play = false;
+
 Cell[][] cellsGrid;
 Cell[][] nextCellsGrid;
 
@@ -26,14 +28,102 @@ void setup() {
 }
 
 void draw() {
+  frameRate(15);
   background(255);
   
-  //drawGrid();
   drawCells();
-  solveGrid();
   
-  cellsGrid = nextCellsGrid; // switch the grid to the new iteration
+  drawBrush();
   
+  /*fill(255);
+  textSize(20);
+  textAlign(LEFT, TOP);
+  text("whadup", 0, 0);*/
+  
+  //_drawNeighbourCounts();
+  
+  // CONWAY'S GAME OF LIFE
+  if (play) {
+    solveGrid();
+    //cellsGrid = nextCellsGrid; // switch the grid to the new iteration - NOT ACTUALLY HAHA
+    //copyArray(nextCellsGrid, cellsGrid, CELLS_NUM_X, CELLS_NUM_Y);
+    for (int j = 0; j < CELLS_NUM_Y; j++) {
+      for (int i = 0; i < CELLS_NUM_X; i++) {
+        cellsGrid[i][j].status = nextCellsGrid[i][j].status;
+      }
+    }
+  }
+  
+}
+
+void _drawNeighbourCounts() { // debug method
+  for (int j = 0; j < CELLS_NUM_Y; j++) {
+    for (int i = 0; i < CELLS_NUM_X; i++) {
+      int liveNeighs = calculateLiveNeighbours(i, j);
+      fill(255);
+      textAlign(LEFT, TOP);
+      textSize(8);
+      text(liveNeighs, i * CELL_SIZE, j * CELL_SIZE);
+    }
+  }
+}
+
+
+void mouseDragged() {
+  
+  if (key == 'd' || key == 'D') {
+    eraseWithBrush();
+  } else {
+    paintWithBrush();
+  }
+}
+
+void mousePressed() {
+  if (key == 'd' || key == 'D') {
+    eraseWithBrush();
+  } else {
+    paintWithBrush();
+  }
+}
+
+void keyPressed() {
+  if (key == 'p' || key == 'P') { // Play
+    play = true;
+  } else if (key == 's' || key == 'S') { // Stop
+    play = false;
+  } else if (key == 'c' || key == 'C') { // Clear
+    play = false; // maybe not needed
+    clearGrid();
+  }
+}
+
+void copyArray(Cell[][] arr1, Cell[][] arr2, int sizeX, int sizeY) {
+  for (int j = 0; j < sizeY; j++) {
+    for (int i = 0; i < sizeX; i++) {
+      arr2[i][j] = arr1[i][j];
+    }
+  }
+}
+
+void drawBrush() {
+  //fill(255);
+  stroke(255);
+  fill(255, 0);
+  ellipse(mouseX, mouseY, 100, 100);
+}
+
+void paintWithBrush() {
+  int i = (int)mouseX / CELL_SIZE;
+  int j = (int)mouseY / CELL_SIZE;
+  println("mouseX / CELL_SIZE = " + mouseX + " / " + CELL_SIZE + " = " + i);
+  cellsGrid[i][j].status = true;
+}
+
+void eraseWithBrush() {
+  int i = (int)mouseX / CELL_SIZE;
+  int j = (int)mouseY / CELL_SIZE;
+  println("mouseX / CELL_SIZE = " + mouseX + " / " + CELL_SIZE + " = " + i);
+  cellsGrid[i][j].status = false;
 }
 
 void solveGrid() {
@@ -81,6 +171,23 @@ void createCells() {
   for (int j = 0; j < CELLS_NUM_Y; j++) {
     for (int i = 0; i < CELLS_NUM_X; i++) {
       //cellsGrid[i][j] = new Cell(i, j, false);
+      cellsGrid[i][j] = new Cell(i, j, false );
+    }
+  }
+}
+
+void clearGrid() {
+  for (int j = 0; j < CELLS_NUM_Y; j++) {
+    for (int i = 0; i < CELLS_NUM_X; i++) {
+      cellsGrid[i][j].status = false;
+    }
+  }
+}
+
+void createCellsRandom() {
+  for (int j = 0; j < CELLS_NUM_Y; j++) {
+    for (int i = 0; i < CELLS_NUM_X; i++) {
+      //cellsGrid[i][j] = new Cell(i, j, false);
       cellsGrid[i][j] = new Cell(i, j, ((int)random(2)) == 1 );
     }
   }
@@ -94,7 +201,7 @@ void drawCells() {
   }
 }
 
-void drawGrid() {
+void drawGrid() { // not used anymore
   
   stroke(200);
   for (int i = 0; i <= width; i += CELL_SIZE) {
