@@ -24,8 +24,13 @@ class Cell {
     int cellWidth = CELL_SIZE;
     int cellHeight = CELL_SIZE;
     
+    /* // no fade out
     int col = this.status ? 255 : 0;
-    fill(col);
+    fill(col);*/
+    
+    // fade out
+    if (this.status) fill(255); else fill(0, 50);
+    
     rect(x, y, cellWidth, cellHeight);
     stroke(0);
   }

@@ -1,18 +1,25 @@
-
 // GOD CONSTANTS
 int CELL_SIZE = 10;
-int WINDOW_SIZE_X = 800;
-int WINDOW_SIZE_Y = 600;
+/*int WINDOW_SIZE_X = 800;
+int WINDOW_SIZE_Y = 600;*/
+int WINDOW_SIZE_X = 1440;
+int WINDOW_SIZE_Y = 900;
 int CELLS_NUM_X = WINDOW_SIZE_X / CELL_SIZE;
 int CELLS_NUM_Y = WINDOW_SIZE_Y / CELL_SIZE;
 
+int currentPatternBrush = 0;
+
 boolean play = false;
+long framecount = 0;
 
 Cell[][] cellsGrid;
 Cell[][] nextCellsGrid;
 
 void setup() {
-  size(800, 600);
+  
+  fullScreen();
+  //size(800, 600);
+  background(0);
   
   // current iteration of grid
   cellsGrid = new Cell[CELLS_NUM_X][CELLS_NUM_Y];
@@ -28,22 +35,19 @@ void setup() {
 }
 
 void draw() {
-  frameRate(15);
-  background(255);
+  //frameRate(15);
+  //background(255);
+  framecount++;
   
   drawCells();
-  
-  drawBrush();
-  
-  /*fill(255);
-  textSize(20);
-  textAlign(LEFT, TOP);
-  text("whadup", 0, 0);*/
+ 
+  //drawBrushPattern(pulsar);
+  drawBrushPattern(patterns[currentPatternBrush]);
   
   //_drawNeighbourCounts();
   
   // CONWAY'S GAME OF LIFE
-  if (play) {
+  if (play /*&& (framecount % 5 == 0)*/) {
     solveGrid();
     //cellsGrid = nextCellsGrid; // switch the grid to the new iteration - NOT ACTUALLY HAHA
     //copyArray(nextCellsGrid, cellsGrid, CELLS_NUM_X, CELLS_NUM_Y);
@@ -78,9 +82,14 @@ void mouseDragged() {
   }
 }
 
+
 void mousePressed() {
-  if (key == 'd' || key == 'D') {
-    eraseWithBrush();
+  if (keyPressed) {
+    if (key == 'd' || key == 'D') {
+      eraseWithBrush();
+    } else if (key == '1') {
+      paintArray(pulsar);
+    }
   } else {
     paintWithBrush();
   }
@@ -94,27 +103,71 @@ void keyPressed() {
   } else if (key == 'c' || key == 'C') { // Clear
     play = false; // maybe not needed
     clearGrid();
+  } else if (key == '1') {
+    //paintArray(pulsar);
+    currentPatternBrush = 0;
+  } else if (key == '2') {
+    currentPatternBrush = 1;
+  } else if (key == '3') {
+    currentPatternBrush = 2;
+  } else if (key == '4') {
+    currentPatternBrush = 3;
+  } else if (key == 'b') {
+    paintArray(patterns[currentPatternBrush]);
   }
 }
 
-void copyArray(Cell[][] arr1, Cell[][] arr2, int sizeX, int sizeY) {
-  for (int j = 0; j < sizeY; j++) {
-    for (int i = 0; i < sizeX; i++) {
-      arr2[i][j] = arr1[i][j];
+void paintArray(int [][] pattern) {
+  int patSizeX = pattern[0].length;
+  int patSizeY = pattern.length;
+  
+  for (int j = 0; j < patSizeY; j++) {
+    for (int i = 0; i < patSizeX; i++) {
+      boolean patPosStatus = pattern[j][i] == 1 ? true : false;
+      int xOffset = (int)mouseX / CELL_SIZE;
+      int yOffset = (int)mouseY / CELL_SIZE;
+      
+      if ( (i + xOffset >= CELLS_NUM_X) || (j + yOffset >= CELLS_NUM_Y) ) continue;
+      
+      cellsGrid[i + xOffset][j + yOffset].status = patPosStatus;
     }
   }
 }
 
 void drawBrush() {
-  //fill(255);
+   // old code - just a circle
   stroke(255);
   fill(255, 0);
   ellipse(mouseX, mouseY, 100, 100);
 }
 
+void drawBrushPattern(int[][] pattern) {
+  int patSizeX = pattern[0].length;
+  int patSizeY = pattern.length;
+  
+  for (int j = 0; j < patSizeY; j++) {
+    for (int i = 0; i < patSizeX; i++) {
+      //boolean patPosStatus = pattern[i][j] == 1 ? true : false;
+      boolean patPosStatus = pattern[j][i] == 1 ? true : false;
+      if (!patPosStatus) continue;
+      
+      int x = mouseX + i * CELL_SIZE;
+      int y = mouseY + j * CELL_SIZE;
+      int w = CELL_SIZE;
+      int h = CELL_SIZE;
+      fill(125, 125);
+      rect(x, y, w, h);
+    
+    }
+  }
+}
+
 void paintWithBrush() {
   int i = (int)mouseX / CELL_SIZE;
   int j = (int)mouseY / CELL_SIZE;
+  if (i < 0 || j < 0) return;
+  if (i >= CELLS_NUM_X || j >= CELLS_NUM_Y) return;
+  
   println("mouseX / CELL_SIZE = " + mouseX + " / " + CELL_SIZE + " = " + i);
   cellsGrid[i][j].status = true;
 }
@@ -127,6 +180,7 @@ void eraseWithBrush() {
 }
 
 void solveGrid() {
+  
   for (int j = 0; j < CELLS_NUM_Y; j++) {
     for (int i = 0; i < CELLS_NUM_X; i++) {
       int liveNeighs = calculateLiveNeighbours(i, j);
@@ -194,6 +248,7 @@ void createCellsRandom() {
 }
 
 void drawCells() {
+  
   for (int j = 0; j < CELLS_NUM_Y; j++) {
     for (int i = 0; i < CELLS_NUM_X; i++) {
       cellsGrid[i][j].drawCell();
@@ -213,3 +268,65 @@ void drawGrid() { // not used anymore
   }
   stroke(0);
 }
+
+int[][][] patterns = {
+  // pulsar
+{
+{0,0,1,1,1,0,0,0,1,1,1,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0},
+{1,0,0,0,0,1,0,1,0,0,0,0,1}, 
+{1,0,0,0,0,1,0,1,0,0,0,0,1},
+{1,0,0,0,0,1,0,1,0,0,0,0,1},
+{0,0,1,1,1,0,0,0,1,1,1,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,1,1,1,0,0,0,1,1,1,0,0},
+{1,0,0,0,0,1,0,1,0,0,0,0,1},
+{1,0,0,0,0,1,0,1,0,0,0,0,1},
+{1,0,0,0,0,1,0,1,0,0,0,0,1},
+{0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,1,1,1,0,0,0,1,1,1,0,0}
+},
+  // lightweight spaceship
+{ 
+{0,1,0,0,1},
+{1,0,0,0,0},
+{1,0,0,0,1}, 
+{1,1,1,1,0}
+},
+  // r-pentomino
+{ 
+{0,1,1},
+{1,1,0},
+{0,1,0}
+},
+  // infinite growth
+{ 
+{1,1,1,0,1},
+{1,0,0,0,0},
+{0,0,0,1,1},
+{0,1,1,0,1},
+{1,0,1,0,1}
+}
+};
+
+int[][] pulsar = {{0,0,1,1,1,0,0,0,1,1,1,0,0},
+                   {0,0,0,0,0,0,0,0,0,0,0,0,0},
+                   {1,0,0,0,0,1,0,1,0,0,0,0,1}, 
+                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
+                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
+                   {0,0,1,1,1,0,0,0,1,1,1,0,0},
+                   {0,0,0,0,0,0,0,0,0,0,0,0,0},
+                   {0,0,1,1,1,0,0,0,1,1,1,0,0},
+                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
+                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
+                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
+                   {0,0,0,0,0,0,0,0,0,0,0,0,0},
+                   {0,0,1,1,1,0,0,0,1,1,1,0,0}};
+                   
+int[][] lightWeightSpaceShip = 
+{ 
+{0,1,0,0,1},
+{1,0,0,0,0},
+{1,0,0,0,1}, 
+{1,1,1,1,0}
+};
