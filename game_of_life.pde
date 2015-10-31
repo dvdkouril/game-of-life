@@ -11,7 +11,11 @@ int CELLS_NUM_Y = WINDOW_SIZE_Y / CELL_SIZE;
 
 int currentPatternBrush = 0;
 
+boolean isInGame = false;
 boolean play = false;
+boolean hideBrush = false;
+boolean fadeOutEffect = false;
+//boolean onePointBrush = true;
 long framecount = 0;
 
 Cell[][] cellsGrid;
@@ -36,15 +40,12 @@ void setup() {
   }
 }
 
-void draw() {
-  //frameRate(15);
-  //background(255);
-  framecount++;
-  
+void drawGameOfLife() {
   drawCells();
- 
-  //drawBrushPattern(pulsar);
-  drawBrushPattern(patterns[currentPatternBrush]);
+  
+  if (!hideBrush) {
+    drawBrushPattern(patterns[currentPatternBrush]);
+  }
   
   //_drawNeighbourCounts();
   
@@ -58,7 +59,34 @@ void draw() {
         cellsGrid[i][j].status = nextCellsGrid[i][j].status;
       }
     }
+  } 
+}
+
+void drawWelcomeScreen() {
+  background(0);
+  fill(255);
+  textAlign(CENTER, TOP);
+  
+  textSize(50);
+  text("\"Brush of Life\"", width/2, height/2 - 80);
+  
+  textSize(18);
+  text("David Kouřil (dvdkouril.com)", width/2, height/2);
+  
+  textSize(20);
+  text("press [space] to start", width/2, height - 100);
+}
+
+void draw() {
+  //frameRate(15);
+  framecount++;
+  
+  if (isInGame) { // play the game
+    drawGameOfLife();
+  } else { // show welcome screen
+    drawWelcomeScreen();
   }
+  
   
 }
 
@@ -74,52 +102,63 @@ void _drawNeighbourCounts() { // debug method
   }
 }
 
-
+/* I think that the cool effect with dragging point brush is because this function is evaluated independently 
+   from draw() function */
 void mouseDragged() {
   
-  if (key == 'd' || key == 'D') {
+  if (mouseButton == LEFT) {
+    paintArray(patterns[currentPatternBrush]);
+  } else if (mouseButton == RIGHT) {
     eraseWithBrush();
-  } else {
-    paintWithBrush();
   }
+  
 }
-
 
 void mousePressed() {
-  if (keyPressed) {
-    if (key == 'd' || key == 'D') {
-      eraseWithBrush();
-    } else if (key == '1') {
-      paintArray(pulsar);
-    }
-  } else {
-    paintWithBrush();
+  if (mouseButton == LEFT) {
+    paintArray(patterns[currentPatternBrush]);
+  } else if (mouseButton == RIGHT) {
+    eraseWithBrush();
   }
+  println("sup.");
 }
 void keyReleased() {
-  if (key == 'f' || key == 'F') saveFrame("dvdisawesome" + timestamp() + "_##.png");
+  if (key == 's' || key == 'S') saveFrame("dvdisawesome" + timestamp() + "_##.png");
 }
 
 void keyPressed() {
-  if (key == 'p' || key == 'P') { // Play
-    play = true;
-  } else if (key == 's' || key == 'S') { // Stop
-    play = false;
+  if (key == 'p' || key == 'P') { // Play/pause
+    play = !play;
   } else if (key == 'c' || key == 'C') { // Clear
-    play = false; // maybe not needed
+    //play = false; // maybe not needed
+    clearGrid();
+  } else if (keyCode == DOWN) { // put down the pattern (for putting just one pattern on exact position)
+    paintArray(patterns[currentPatternBrush]);
+  } else if (key == ' ') {
+    isInGame = true;
+  } else if (key == ESC) {
+    if (isInGame) { // if we are not on welcome screen, we do not want to quit
+      key = 0;
+    }
+    isInGame = false;
     clearGrid();
   } else if (key == '1') {
-    //paintArray(pulsar);
     currentPatternBrush = 0;
   } else if (key == '2') {
+    //paintArray(pulsar);
     currentPatternBrush = 1;
   } else if (key == '3') {
     currentPatternBrush = 2;
   } else if (key == '4') {
     currentPatternBrush = 3;
-  } else if (key == 'b') {
-    paintArray(patterns[currentPatternBrush]);
+  } else if (key == '5') {
+    currentPatternBrush = 4;
+  } else if (key == '0') {
+    hideBrush = !hideBrush;
+  } else if (key == 'q') {
+    fadeOutEffect = !fadeOutEffect;
   }
+  
 }
 
 void paintArray(int [][] pattern) {
@@ -144,6 +183,11 @@ void drawBrush() {
   stroke(255);
   fill(255, 0);
   ellipse(mouseX, mouseY, 100, 100);
+}
+
+void drawOnePointBrush() {
+  fill(125, 125);
+  rect(mouseX, mouseY, CELL_SIZE, CELL_SIZE);
 }
 
 void drawBrushPattern(int[][] pattern) {
@@ -173,7 +217,7 @@ void paintWithBrush() {
   if (i < 0 || j < 0) return;
   if (i >= CELLS_NUM_X || j >= CELLS_NUM_Y) return;
   
-  println("mouseX / CELL_SIZE = " + mouseX + " / " + CELL_SIZE + " = " + i);
+  //println("mouseX / CELL_SIZE = " + mouseX + " / " + CELL_SIZE + " = " + i);
   cellsGrid[i][j].status = true;
 }
 
@@ -275,6 +319,10 @@ void drawGrid() { // not used anymore
 }
 
 int[][][] patterns = {
+  // point ... yes, lol
+{
+{1}
+},
   // pulsar
 {
 {0,0,1,1,1,0,0,0,1,1,1,0,0},
@@ -313,29 +361,6 @@ int[][][] patterns = {
 {1,0,1,0,1}
 }
 };
-
-int[][] pulsar = {{0,0,1,1,1,0,0,0,1,1,1,0,0},
-                   {0,0,0,0,0,0,0,0,0,0,0,0,0},
-                   {1,0,0,0,0,1,0,1,0,0,0,0,1}, 
-                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
-                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
-                   {0,0,1,1,1,0,0,0,1,1,1,0,0},
-                   {0,0,0,0,0,0,0,0,0,0,0,0,0},
-                   {0,0,1,1,1,0,0,0,1,1,1,0,0},
-                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
-                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
-                   {1,0,0,0,0,1,0,1,0,0,0,0,1},
-                   {0,0,0,0,0,0,0,0,0,0,0,0,0},
-                   {0,0,1,1,1,0,0,0,1,1,1,0,0}};
-                   
-int[][] lightWeightSpaceShip = 
-{ 
-{0,1,0,0,1},
-{1,0,0,0,0},
-{1,0,0,0,1}, 
-{1,1,1,1,0}
-};
-
 
 // timestamp
 String timestamp() {

@@ -29,7 +29,16 @@ class Cell {
     fill(col);*/
     
     // fade out
-    if (this.status) fill(255); else fill(0, 50);
+    //if (this.status) fill(255); else fill(0, 50);
+    if (this.status) {
+      fill(255);
+    } else {
+      if (fadeOutEffect) {
+        fill(0, 50); // fade out
+      } else {
+        fill(0);     // no fadeout
+      }
+    }
     
     rect(x, y, cellWidth, cellHeight);
     stroke(0);
