@@ -4,8 +4,10 @@ import java.util.Calendar;
 int CELL_SIZE = 10;
 /*int WINDOW_SIZE_X = 800;
 int WINDOW_SIZE_Y = 600;*/
-int WINDOW_SIZE_X = 1440;
-int WINDOW_SIZE_Y = 900;
+/*int WINDOW_SIZE_X = 1440;
+int WINDOW_SIZE_Y = 900;*/
+int WINDOW_SIZE_X = 1920;
+int WINDOW_SIZE_Y = 1080;
 int CELLS_NUM_X = WINDOW_SIZE_X / CELL_SIZE;
 int CELLS_NUM_Y = WINDOW_SIZE_Y / CELL_SIZE;
 
