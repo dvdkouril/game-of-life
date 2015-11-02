@@ -1,4 +1,20 @@
 import java.util.Calendar;
+/* ===================================================================================
+--------------------------------------------------------------------------------------
+    BRUSH OF LIFE - Prototype for Generative Design class at FI MU
+    by David Kouril (www.dvdkouril.com)
+--------------------------------------------------------------------------------------
+Controls:
+Left mouse button:       draw!
+Right mouse button:      erase
+Down key:                single touch of brush
+1 - 5:                   change brushes
+0:                       show/hide brush
+p:                       play/pause Conway's Game of Life simulation
+c:                       clear screen
+s:                       save screenshot
+q:                       enable/disable fadeout effect
+====================================================================================== */
 
 // GOD CONSTANTS
 int CELL_SIZE = 10;
