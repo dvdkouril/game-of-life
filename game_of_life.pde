@@ -33,7 +33,7 @@ boolean isInGame = false;
 boolean play = false;
 boolean hideBrush = false;
 boolean fadeOutEffect = false;
-boolean cellColorMode = true;
+boolean cellColorMode = false;
 //boolean onePointBrush = true;
 long framecount = 0;
 
