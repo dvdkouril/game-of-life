@@ -20,10 +20,10 @@ q:                       enable/disable fadeout effect
 int CELL_SIZE = 10;
 /*int WINDOW_SIZE_X = 800;
 int WINDOW_SIZE_Y = 600;*/
-/*int WINDOW_SIZE_X = 1440;
-int WINDOW_SIZE_Y = 900;*/
-int WINDOW_SIZE_X = 1920;
-int WINDOW_SIZE_Y = 1080;
+int WINDOW_SIZE_X = 1440;
+int WINDOW_SIZE_Y = 900;
+/*int WINDOW_SIZE_X = 1920;
+int WINDOW_SIZE_Y = 1080;*/
 int CELLS_NUM_X = WINDOW_SIZE_X / CELL_SIZE;
 int CELLS_NUM_Y = WINDOW_SIZE_Y / CELL_SIZE;
 
@@ -33,6 +33,7 @@ boolean isInGame = false;
 boolean play = false;
 boolean hideBrush = false;
 boolean fadeOutEffect = false;
+boolean cellColorMode = true;
 //boolean onePointBrush = true;
 long framecount = 0;
 
@@ -75,6 +76,7 @@ void drawGameOfLife() {
     for (int j = 0; j < CELLS_NUM_Y; j++) {
       for (int i = 0; i < CELLS_NUM_X; i++) {
         cellsGrid[i][j].status = nextCellsGrid[i][j].status;
+        cellsGrid[i][j].hue = nextCellsGrid[i][j].hue;
       }
     }
   } 
@@ -175,6 +177,8 @@ void keyPressed() {
     hideBrush = !hideBrush;
   } else if (key == 'q') {
     fadeOutEffect = !fadeOutEffect;
+  } else if (key == 'w') {
+    cellColorMode = !cellColorMode;
   }
   
 }
@@ -183,6 +187,7 @@ void paintArray(int [][] pattern) {
   int patSizeX = pattern[0].length;
   int patSizeY = pattern.length;
   
+  float randomHue = random(0, 255);
   for (int j = 0; j < patSizeY; j++) {
     for (int i = 0; i < patSizeX; i++) {
       boolean patPosStatus = pattern[j][i] == 1 ? true : false;
@@ -192,6 +197,7 @@ void paintArray(int [][] pattern) {
       if ( (i + xOffset >= CELLS_NUM_X) || (j + yOffset >= CELLS_NUM_Y) ) continue;
       
       cellsGrid[i + xOffset][j + yOffset].status = patPosStatus;
+      if (patPosStatus) cellsGrid[i + xOffset][j + yOffset].hue = randomHue;
     }
   }
 }
@@ -254,8 +260,37 @@ void solveGrid() {
       boolean currentStatus = cellsGrid[i][j].status;
       boolean newStatus = solveCell(currentStatus, liveNeighs);
       nextCellsGrid[i][j].status = newStatus;
+      if (!currentStatus && newStatus) { // cell went from dead to alive
+        nextCellsGrid[i][j].hue = calculateNeighboursColor(i, j);
+      }
     }
   }
+}
+
+
+/*
+  Function calculates average hue of its live neighbours (only called for dead cell)
+*/
+float calculateNeighboursColor(int i, int j) {
+  
+  int num = 0;
+  float sumhue = 0;
+  for (int l = j - 1; l <= j + 1; l++) {
+    for (int k = i - 1; k <= i + 1; k++) {
+      if (k == i && l == j) continue; // skip the current cell
+      
+      if (k < 0 || l < 0) continue; // boundary condition
+      if (k >= CELLS_NUM_X || l >= CELLS_NUM_Y) continue; // boundary condition
+      
+      if (cellsGrid[k][l].status) {
+        num += 1;
+        sumhue += cellsGrid[k][l].hue;
+      }
+    }
+  }
+  
+  println(sumhue / num);
+  return sumhue / num;
 }
 
 int calculateLiveNeighbours(int i, int j) {

@@ -2,11 +2,13 @@ class Cell {
   int xIndex;  // x coordinate in the grid
   int yIndex; // y coordinate in the grid
   boolean status; // true = alive; false = ded
+  float hue;
   
   Cell(int x, int y, boolean s) {
     this.status = s;
     this.xIndex = x;
     this.yIndex = y;
+    hue = 0;
   }
 
   Cell(int x, int y) {
@@ -24,14 +26,14 @@ class Cell {
     int cellWidth = CELL_SIZE;
     int cellHeight = CELL_SIZE;
     
-    /* // no fade out
-    int col = this.status ? 255 : 0;
-    fill(col);*/
-    
-    // fade out
-    //if (this.status) fill(255); else fill(0, 50);
     if (this.status) {
-      fill(255);
+      if (cellColorMode) {
+        colorMode(HSB);
+        fill(hue, 255, 255);
+        colorMode(RGB);
+      } else {
+        fill(255);
+      }
     } else {
       if (fadeOutEffect) {
         fill(0, 50); // fade out
